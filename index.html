@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High Arctic PNG - Social Media Sentiment Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #ffffff;
+            color: #0d2038;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: #f0f8ff;
+            border-radius: 8px;
+        }
+
+        .logo {
+            font-family: 'Manrope', sans-serif;
+            font-size: 2.5em;
+            font-weight: 800;
+            color: #255799;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .tagline {
+            font-size: 1.1em;
+            color: #0d2038;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .last-updated {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            color: #0d2038;
+            opacity: 0.7;
+        }
+
+        .last-updated span:first-child {
+            color: #10b981;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #f0f8ff;
+            border-radius: 8px;
+            padding: 30px;
+            border: 1px solid rgba(37, 87, 153, 0.1);
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #0d2038;
+            opacity: 0.6;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        .stat-value {
+            font-size: 3.2em;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .stat-description {
+            font-size: 0.9em;
+            color: #0d2038;
+            opacity: 0.7;
+        }
+
+        .positive { color: #10b981; }
+        .non-positive { color: #bf2130; }
+        .total { color: #255799; }
+
+        /* Section Headers */
+        .section-title {
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #0d2038;
+            letter-spacing: -0.5px;
+        }
+
+        /* Sentiment Bars */
+        .sentiment-bars {
+            background: #f0f8ff;
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 30px;
+        }
+
+        .sentiment-bar {
+            margin-bottom: 25px;
+        }
+
+        .sentiment-bar:last-child {
+            margin-bottom: 0;
+        }
+
+        .sentiment-bar-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 1em;
+            font-weight: 700;
+        }
+
+        .sentiment-bar-track {
+            height: 35px;
+            background: rgba(37, 87, 153, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sentiment-bar-fill {
+            height: 100%;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15px;
+            font-weight: 700;
+            font-size: 0.95em;
+            color: white;
+        }
+
+        .bar-positive {
+            background: #10b981;
+        }
+
+        .bar-non-positive {
+            background: #bf2130;
+        }
+
+        /* Themes Section */
+        .themes-section {
+            background: #f0f8ff;
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 30px;
+        }
+
+        .themes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .theme-card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 25px;
+            border: 1px solid rgba(37, 87, 153, 0.1);
+        }
+
+        .theme-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .theme-title {
+            font-size: 1.05em;
+            font-weight: 700;
+            color: #0d2038;
+        }
+
+        .theme-percentage {
+            font-size: 1.8em;
+            font-weight: 800;
+            color: #255799;
+        }
+
+        .theme-description {
+            color: #0d2038;
+            opacity: 0.7;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .theme-count {
+            font-size: 0.85em;
+            color: #0d2038;
+            opacity: 0.6;
+            font-weight: 600;
+        }
+
+        /* Insights Section */
+        .insights-section {
+            background: #f0f8ff;
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 30px;
+        }
+
+        .insight-item {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 15px;
+            border-left: 4px solid #255799;
+            border: 1px solid rgba(37, 87, 153, 0.1);
+            border-left: 4px solid #255799;
+        }
+
+        .insight-title {
+            font-size: 1.15em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #255799;
+        }
+
+        .insight-text {
+            color: #0d2038;
+            opacity: 0.8;
+            margin-bottom: 12px;
+            line-height: 1.7;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 700;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .priority-high {
+            background: rgba(191, 33, 48, 0.1);
+            color: #bf2130;
+            border: 1px solid rgba(191, 33, 48, 0.2);
+        }
+
+        .priority-medium {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .priority-low {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        /* Content Performance Cards */
+        .content-card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(37, 87, 153, 0.1);
+        }
+
+        .content-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .content-type {
+            font-size: 1.15em;
+            font-weight: 700;
+            color: #255799;
+        }
+
+        .engagement-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .engagement-high {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .engagement-medium-high {
+            background: rgba(59, 130, 246, 0.1);
+            color: #255799;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .engagement-medium {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .content-sentiment {
+            color: #0d2038;
+            opacity: 0.8;
+            line-height: 1.7;
+            font-size: 0.95em;
+        }
+
+        .sentiment-label {
+            font-weight: 600;
+            color: #0d2038;
+            opacity: 0.6;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        /* Keywords Cloud */
+        .keywords-section {
+            background: #f0f8ff;
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 30px;
+        }
+
+        .keywords-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .keyword-tag {
+            background: #ffffff;
+            border: 1px solid rgba(37, 87, 153, 0.2);
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: #255799;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 35px;
+            color: #0d2038;
+            opacity: 0.6;
+            font-size: 0.9em;
+            border-top: 1px solid rgba(37, 87, 153, 0.1);
+            margin-top: 40px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2em;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .themes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-value {
+                font-size: 2.5em;
+            }
+
+            .header {
+                padding: 30px 15px;
+            }
+
+            .section-title {
+                font-size: 1.5em;
+            }
+
+            .content-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(37, 87, 153, 0.2);
+            border-top: 4px solid #255799;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            color: #0d2038;
+            opacity: 0.7;
+            font-size: 1.05em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="logo">HIGH ARCTIC PNG</h1>
+            <p class="tagline">Facebook Community Sentiment Analysis</p>
+            <div class="last-updated" id="lastUpdated">
+                <span>●</span>
+                <span>Loading...</span>
+            </div>
+        </header>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">Analyzing sentiment data...</div>
+        </div>
+
+        <!-- Main Content (Hidden until data loads) -->
+        <div id="mainContent" style="display: none;">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Comments</div>
+                    <div class="stat-value total" id="totalComments">0</div>
+                    <div class="stat-description">Analyzed from Facebook</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Positive</div>
+                    <div class="stat-value positive" id="positiveCount">0</div>
+                    <div class="stat-description" id="positivePercent">0% of total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Non-Positive</div>
+                    <div class="stat-value non-positive" id="nonPositiveCount">0</div>
+                    <div class="stat-description" id="nonPositivePercent">0% of total</div>
+                </div>
+            </div>
+
+            <!-- Sentiment Bars -->
+            <div class="sentiment-bars">
+                <h2 class="section-title">Sentiment Distribution</h2>
+                <div class="sentiment-bar">
+                    <div class="sentiment-bar-header">
+                        <span class="positive">Positive</span>
+                        <span id="positivePercentBar">0%</span>
+                    </div>
+                    <div class="sentiment-bar-track">
+                        <div class="sentiment-bar-fill bar-positive" id="positiveBar" style="width: 0%">
+                            <span id="positiveBarText"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="sentiment-bar">
+                    <div class="sentiment-bar-header">
+                        <span class="non-positive">Non-Positive</span>
+                        <span id="nonPositivePercentBar">0%</span>
+                    </div>
+                    <div class="sentiment-bar-track">
+                        <div class="sentiment-bar-fill bar-non-positive" id="nonPositiveBar" style="width: 0%">
+                            <span id="nonPositiveBarText"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Themes -->
+            <div class="themes-section">
+                <h2 class="section-title">Key Themes in Comments</h2>
+                <div class="themes-grid" id="themesGrid"></div>
+            </div>
+
+            <!-- Keywords -->
+            <div class="keywords-section">
+                <h2 class="section-title">Most Common Keywords</h2>
+                <div class="keywords-cloud" id="keywordsCloud"></div>
+            </div>
+
+            <!-- Actionable Insights -->
+            <div class="insights-section">
+                <h2 class="section-title">Strategic Recommendations</h2>
+                <div id="insightsContainer"></div>
+            </div>
+
+            <!-- Top Performing Content -->
+            <div class="insights-section">
+                <h2 class="section-title">Top Performing Content Types</h2>
+                <div id="topContentContainer"></div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2026 High Arctic PNG | Powered by Sentiment</p>
+            <p style="margin-top: 10px; font-size: 0.85em;">Data Period: 2016-2026 | Platform: Facebook | 559 Comments Analyzed</p>
+        </footer>
+    </div>
+
+    <script>
+        // Embedded data
+        const dashboardData = {"metadata":{"company":"High Arctic PNG","analysis_date":"2026-01-15","total_comments":559,"date_range":"2016-2026","platform":"Facebook","analyst":"Social Media Intelligence System"},"sentiment_summary":{"positive":{"count":458,"percentage":82},"non_positive":{"count":101,"percentage":18}},"all_keywords":["congratulations","great","well done","excellent","good job","proud","success","amazing","awesome","fantastic","interested","apply","contact","information","email","address","application","position","overlooked","concern","disappointed","issue","problem","delayed"],"key_themes":{"employment_interest":{"count":127,"percentage":23,"description":"Job applications and employment inquiries","sample_comments":["I really love to work with HAES","Would love to work for HAES again","REALLY INTERESTED TO JOIN HAES"]},"safety_recognition":{"count":94,"percentage":17,"description":"Recognition of safety achievements and standards","sample_comments":["World class Energy Services Ltd, their priority is employees Safety","Well done to the individual crews for in one piece","Outstanding safety performance"]},"team_congratulations":{"count":186,"percentage":33,"description":"Congratulations and appreciation for team achievements","sample_comments":["Congratulations to the team!","Great TEAM","Well done","Another great success. Cheers HAES!!"]},"community_engagement":{"count":52,"percentage":9,"description":"Community involvement and CSR appreciation","sample_comments":["Great to see corporate sponsorship","A family company","Excellent community support"]},"employee_recognition":{"count":48,"percentage":9,"description":"Recognition of individual employee achievements","sample_comments":["Excellent work John Baia","Proud of you","Keep doing what you're doing"]},"seasonal_greetings":{"count":32,"percentage":6,"description":"Holiday and seasonal messages","sample_comments":["Merry Christmas and happy New year","Season's Greetings"]},"compensation_concerns":{"count":11,"percentage":2,"description":"Questions about compensation and benefits","sample_comments":["Some of us were pioneers of this company but overlooked by HR in POM"]},"operational_updates":{"count":9,"percentage":2,"description":"Responses to operational news","sample_comments":["PNGs money maker units","Great to see drilling rig 103 started work"]}},"actionable_insights":[{"insight":"High Employment Interest","recommendation":"Create a dedicated careers page link in Facebook posts and regular job posting updates","priority":"High"},{"insight":"Safety-Focused Brand Identity","recommendation":"Continue highlighting safety achievements as this generates strong positive engagement","priority":"High"},{"insight":"Strong Community Loyalty","recommendation":"Employee recognition posts generate excellent engagement - increase frequency","priority":"Medium"},{"insight":"Minimal Negative Sentiment","recommendation":"Current engagement strategy is effective - maintain consistency","priority":"Medium"},{"insight":"Information Requests","recommendation":"Include contact information and application links in all recruitment-related posts","priority":"High"},{"insight":"Seasonal Engagement Spikes","recommendation":"Plan content calendar around PNG public holidays and industry events","priority":"Low"}],"top_performing_content":[{"type":"Safety Milestones","avg_engagement":"High","sentiment":"Overwhelmingly positive"},{"type":"Employee Profiles","avg_engagement":"High","sentiment":"Positive with employment inquiries"},{"type":"Project Announcements","avg_engagement":"Medium-High","sentiment":"Positive"},{"type":"Community/CSR","avg_engagement":"Medium","sentiment":"Positive"},{"type":"Seasonal Greetings","avg_engagement":"Medium","sentiment":"Positive"}]};
+
+        // Load and display data
+        function loadDashboard() {
+            try {
+                const data = dashboardData;
+                
+                // Update last updated time
+                document.getElementById('lastUpdated').innerHTML = `
+                    <span>●</span>
+                    <span>Last updated: ${new Date(data.metadata.analysis_date).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    })}</span>
+                `;
+
+                // Update stats
+                document.getElementById('totalComments').textContent = data.metadata.total_comments;
+                document.getElementById('positiveCount').textContent = data.sentiment_summary.positive.count;
+                document.getElementById('positivePercent').textContent = `${data.sentiment_summary.positive.percentage}% of total`;
+                document.getElementById('nonPositiveCount').textContent = data.sentiment_summary.non_positive.count;
+                document.getElementById('nonPositivePercent').textContent = `${data.sentiment_summary.non_positive.percentage}% of total`;
+
+                // Update sentiment bars with animation
+                setTimeout(() => {
+                    document.getElementById('positiveBar').style.width = `${data.sentiment_summary.positive.percentage}%`;
+                    document.getElementById('positiveBarText').textContent = `${data.sentiment_summary.positive.count}`;
+                    document.getElementById('positivePercentBar').textContent = `${data.sentiment_summary.positive.percentage}%`;
+                    
+                    document.getElementById('nonPositiveBar').style.width = `${data.sentiment_summary.non_positive.percentage}%`;
+                    document.getElementById('nonPositiveBarText').textContent = `${data.sentiment_summary.non_positive.count}`;
+                    document.getElementById('nonPositivePercentBar').textContent = `${data.sentiment_summary.non_positive.percentage}%`;
+                }, 100);
+
+                // Display key themes
+                const themesGrid = document.getElementById('themesGrid');
+                Object.entries(data.key_themes).forEach(([key, theme]) => {
+                    const themeCard = `
+                        <div class="theme-card">
+                            <div class="theme-header">
+                                <div class="theme-title">${theme.description}</div>
+                                <div class="theme-percentage">${theme.percentage}%</div>
+                            </div>
+                            <div class="theme-description">"${theme.sample_comments[0]}"</div>
+                            <div class="theme-count">${theme.count} comments</div>
+                        </div>
+                    `;
+                    themesGrid.innerHTML += themeCard;
+                });
+
+                // Display all keywords together
+                const keywordsCloud = document.getElementById('keywordsCloud');
+                data.all_keywords.forEach(keyword => {
+                    keywordsCloud.innerHTML += `<div class="keyword-tag">${keyword}</div>`;
+                });
+
+                // Display actionable insights
+                const insightsContainer = document.getElementById('insightsContainer');
+                data.actionable_insights.forEach(insight => {
+                    const priorityClass = `priority-${insight.priority.toLowerCase()}`;
+                    const insightHtml = `
+                        <div class="insight-item">
+                            <div class="insight-title">${insight.insight}</div>
+                            <div class="insight-text">${insight.recommendation}</div>
+                            <span class="priority-badge ${priorityClass}">Priority: ${insight.priority}</span>
+                        </div>
+                    `;
+                    insightsContainer.innerHTML += insightHtml;
+                });
+
+                // Display top performing content with improved formatting
+                const topContentContainer = document.getElementById('topContentContainer');
+                data.top_performing_content.forEach(content => {
+                    // Determine engagement badge class
+                    let engagementClass = 'engagement-medium';
+                    if (content.avg_engagement === 'High') {
+                        engagementClass = 'engagement-high';
+                    } else if (content.avg_engagement === 'Medium-High') {
+                        engagementClass = 'engagement-medium-high';
+                    }
+
+                    const contentHtml = `
+                        <div class="content-card">
+                            <div class="content-card-header">
+                                <div class="content-type">${content.type}</div>
+                                <span class="engagement-badge ${engagementClass}">${content.avg_engagement} Engagement</span>
+                            </div>
+                            <div class="sentiment-label">Audience Sentiment</div>
+                            <div class="content-sentiment">${content.sentiment}</div>
+                        </div>
+                    `;
+                    topContentContainer.innerHTML += contentHtml;
+                });
+
+                // Hide loading, show content
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div style="color: #bf2130; font-size: 1.2em; font-weight: 600;">
+                        Error loading dashboard data
+                    </div>
+                    <div class="loading-text">Please check console for details</div>
+                `;
+            }
+        }
+
+        // Load dashboard on page load
+        window.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>
