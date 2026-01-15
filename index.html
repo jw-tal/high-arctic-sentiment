@@ -37,13 +37,11 @@
             border-radius: 8px;
         }
 
-        .logo {
-            font-family: 'Manrope', sans-serif;
-            font-size: 2.5em;
-            font-weight: 800;
-            color: #255799;
-            margin-bottom: 12px;
-            letter-spacing: -0.5px;
+        .logo-image {
+            max-width: 400px;
+            width: 100%;
+            height: auto;
+            margin-bottom: 20px;
         }
 
         .tagline {
@@ -395,8 +393,8 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .logo {
-                font-size: 2em;
+            .logo-image {
+                max-width: 280px;
             }
 
             .stats-grid {
@@ -461,7 +459,7 @@
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1 class="logo">HIGH ARCTIC PNG</h1>
+            <img src="https://i0.wp.com/higharctic.com/wp-content/uploads/2025/10/High-Arctic-Logo-4-Oct-2025.png" alt="High Arctic PNG" class="logo-image">
             <p class="tagline">Facebook Community Sentiment Analysis</p>
             <div class="last-updated" id="lastUpdated">
                 <span>●</span>
